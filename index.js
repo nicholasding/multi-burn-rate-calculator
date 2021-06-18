@@ -22,13 +22,15 @@ class MultipleBurnRateCalculator {
         const errorBudget = 1 - (slo/100);
         const errorThresholds = {};
 
-        for (const humanTime of ['1h', '6h', '1d', '3d']) {
+        for (const humanTime of ['1h', '5m', '6h', '30m']) {
             const budgetConsuption = parseFloat(this.form.querySelector(`#budget_consumption_${humanTime}`).value);
 
             let [time, kind] = humanTime.split('');
             time = parseInt(time);
 
-            if (kind === 'd') {
+            if (kind == 'm') {
+                time = time / 60;
+            } else if (kind === 'd') {
                 time = time * 24;
             }
 
@@ -51,25 +53,25 @@ class MultipleBurnRateCalculator {
             const errorRate = Math.pow(startLog, i * 2);
 
             const detectionTime1h = detectionTime(errorThresholds['1h'], (60 * 1), errorRate);
-            const detectionTime6h = detectionTime(errorThresholds['6h'], (60 * 6), errorRate);
-            const detectionTime1d = detectionTime(errorThresholds['1d'], (60 * 24), errorRate);
-            const detectionTime3d = detectionTime(errorThresholds['3d'], (60 * 24 * 3),errorRate);
+            const detectionTime5m = detectionTime(errorThresholds['5m'], (60 * 6), errorRate);
+            const detectionTime6h = detectionTime(errorThresholds['6h'], (60 * 24), errorRate);
+            const detectionTime30m = detectionTime(errorThresholds['30m'], (60 * 24 * 3),errorRate);
 
             let detectionPage = -1;
-            if (detectionTime1h < detectionTime6h && detectionTime1h > -1) {
+            if (detectionTime1h < detectionTime5m && detectionTime1h > -1) {
                 detectionPage = detectionTime1h;
-            } else if (detectionTime6h > -1) {
-                detectionPage = detectionTime6h;
+            } else if (detectionTime5m > -1) {
+                detectionPage = detectionTime5m;
             }
 
             pagePoints.push([errorRate, detectionPage]);
 
             let detectionTicket = -1;
             if (detectionPage === -1) {
-                if (detectionTime1d < detectionTime3d && detectionTime1d > -1) {
-                    detectionTicket = detectionTime1d;
-                } else if (detectionTime3d > -1) {
-                    detectionTicket = detectionTime3d;
+                if (detectionTime6h < detectionTime30m && detectionTime6h > -1) {
+                    detectionTicket = detectionTime6h;
+                } else if (detectionTime30m > -1) {
+                    detectionTicket = detectionTime30m;
                 }
             }
 
